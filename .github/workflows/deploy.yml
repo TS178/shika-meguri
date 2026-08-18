@@ -1,0 +1,80 @@
+# GitHub Pages への自動公開
+#
+# main ブランチに push すると、このワークフローが
+#   1. 必要な部品をインストール
+#   2. 抽選ロジックのテストを実行
+#   3. 静的サイトとしてビルド
+#   4. GitHub Pages に公開
+# までを自動で行います。
+#
+# 【最初に1度だけ必要な設定】
+#   リポジトリの Settings → Pages → Build and deployment → Source を
+#   「GitHub Actions」に変更してください。
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # 手動でも実行できるようにしておく
+  workflow_dispatch:
+
+# 公開に必要な権限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時に複数のデプロイが走らないようにする
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ソースコードを取得
+        uses: actions/checkout@v4
+
+      - name: Node.js を用意
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 依存パッケージをインストール
+        run: npm ci
+
+      - name: カードデータの整合性チェックとドキュメント生成
+        run: npm run gen:docs
+
+      - name: 抽選ロジックのテスト
+        run: npm test
+
+      - name: 静的サイトをビルド
+        # リポジトリ名をサブパスとして渡す。
+        # 例: リポジトリ名が shika-meguri なら /shika-meguri が入る。
+        # これを忘れると公開後に画像やCSSが読み込めなくなる。
+        env:
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+        run: npm run build
+
+      - name: Pages の設定を読み込む
+        uses: actions/configure-pages@v5
+
+      - name: ビルド結果をアップロード
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: GitHub Pages に公開
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,4 @@
+# 改行コードをリポジトリ内では LF に統一する。
+# ビルドは GitHub Actions（Linux）で行うため、LF に揃えておくと
+# Windows と Linux で差分が出たり、警告が出続けたりするのを防げる。
+* text=auto eol=lf

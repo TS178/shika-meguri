@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+/*
+  配色は「夜の日本海と宝箱の灯り」をイメージした暗色基調で固定している。
+  ガチャの光の演出を主役にするため、明暗の切り替えは設けていない。
+*/
+@theme {
+  /* 背景・面 */
+  --color-night: #101620;
+  --color-night-2: #171f2b;
+  --color-surface: #1e2733;
+  --color-surface-2: #26313f;
+  --color-line: #35404f;
+
+  /* 文字 */
+  --color-ink: #f4efe4;
+  --color-ink-dim: #a9b4c2;
+  --color-ink-faint: #6c7889;
+
+  /* ジャンルの色 */
+  --color-gold: #d4a447;
+  --color-gold-deep: #8a6420;
+  --color-gold-pale: #f0d9a0;
+  --color-sea: #3fa8c4;
+  --color-sea-deep: #1c6379;
+  --color-sea-pale: #a8e0ee;
+  --color-urushi: #b7282e;
+  --color-urushi-deep: #6d1418;
+  --color-urushi-pale: #e8a0a3;
+
+  /* コイン */
+  --color-coin: #f0c14b;
+
+  --font-sans:
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Yu Gothic",
+    Meiryo, "Noto Sans JP", system-ui, sans-serif;
+  --font-serif:
+    "Hiragino Mincho ProN", "Yu Mincho", "YuMincho", "MS PMincho",
+    "Noto Serif JP", serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-night);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  /* 下部のタブバーに隠れないよう、safe-area ぶんの余白を確保する */
+  padding-bottom: env(safe-area-inset-bottom);
+  overscroll-behavior-y: none;
+}
+
+/* iOS でボタンを二度押ししたときの拡大を防ぐ */
+button {
+  touch-action: manipulation;
+}
+
+/* 画面全体の背景に、うっすら和紙のような粒状感を敷く */
+.bg-washi {
+  background-image:
+    radial-gradient(
+      ellipse 80% 50% at 50% -10%,
+      rgba(212, 164, 71, 0.1),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 90% 110%,
+      rgba(63, 168, 196, 0.08),
+      transparent 70%
+    );
+}
+
+/* 木目のテクスチャ（アテ・グルメの枠に使う） */
+.tex-wood {
+  background-image: repeating-linear-gradient(
+    92deg,
+    rgba(255, 255, 255, 0.06) 0px,
+    rgba(255, 255, 255, 0.06) 1px,
+    transparent 1px,
+    transparent 4px,
+    rgba(0, 0, 0, 0.08) 4px,
+    rgba(0, 0, 0, 0.08) 5px,
+    transparent 5px,
+    transparent 9px
+  );
+}
+
+/* 波のテクスチャ（観光地・スポットの枠に使う） */
+.tex-wave {
+  background-image: repeating-radial-gradient(
+    circle at 50% 120%,
+    rgba(255, 255, 255, 0.09) 0px,
+    rgba(255, 255, 255, 0.09) 1px,
+    transparent 1px,
+    transparent 7px
+  );
+}
+
+/* 漆の艶（伝統工芸・酒器の枠に使う） */
+.tex-urushi {
+  background-image: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.16) 0%,
+    rgba(255, 255, 255, 0.03) 22%,
+    transparent 45%,
+    rgba(255, 255, 255, 0.05) 78%,
+    transparent 100%
+  );
+}
+
+/* 未入手カードのシルエット表示 */
+.silhouette {
+  filter: brightness(0) saturate(0);
+  opacity: 0.35;
+}
+
+/* ───────── アニメーション ───────── */
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -160% 0;
+  }
+  to {
+    background-position: 260% 0;
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.anim-float {
+  animation: float-slow 4s ease-in-out infinite;
+}
+
+.anim-card-in {
+  animation: card-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-pop {
+  animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* NEW バッジなどに乗せる光の走り */
+.anim-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 80%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.4s ease-in-out infinite;
+}
+
+/*
+  「視差効果を減らす」設定をしている利用者には、
+  動きを止めて内容だけが伝わるようにする。
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
