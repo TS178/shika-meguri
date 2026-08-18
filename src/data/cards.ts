@@ -796,6 +796,23 @@ export const CARDS: Card[] = [...GOURMET, ...SPOTS, ...CRAFTS];
 
 export const TOTAL_CARDS = CARDS.length;
 
+/** まだ事実確認が済んでいないカードの枚数 */
+export const UNVERIFIED_COUNT = CARDS.filter((c) => !c.verified).length;
+
+/**
+ * 全カードの記載内容が公式情報と照合済みかどうか。
+ *
+ * これが false のあいだは、
+ *   - 画面上部に「制作中・情報未検証」の帯を出す
+ *   - 検索エンジンに載らないようにする（noindex）
+ * という安全策が自動でかかる。
+ *
+ * `src/data/cards.ts` の verified をすべて true にすると、
+ * この値が true になり、両方の安全策が自動的に外れる。
+ * 手作業で切り替える必要がないので、切り忘れが起きない。
+ */
+export const ALL_VERIFIED = UNVERIFIED_COUNT === 0;
+
 export const CARD_IDS: string[] = CARDS.map((c) => c.id);
 
 const CARD_BY_ID = new Map(CARDS.map((c) => [c.id, c]));
